@@ -1,4 +1,3 @@
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/constants/utils.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -125,9 +124,7 @@ class _ThankYouPageState extends State<ThankYouPage> {
                               ),
                               child: Text(
                                 '${lastOrder?.id}',
-                                style: TextStyle(
-                                  color: GlobalVariables.selectedNavBarColor,
-                                ),
+                                style: const TextStyle(color: Colors.black),
                               ),
                             ),
                           ],
@@ -161,10 +158,8 @@ class _ThankYouPageState extends State<ThankYouPage> {
                                         ),
                                         child: Text(
                                           '${productList?[i].name}',
-                                          style: TextStyle(
-                                            color: GlobalVariables
-                                                .selectedNavBarColor,
-                                          ),
+                                          style: const TextStyle(
+                                              color: Colors.black),
                                         ),
                                       ),
                                     ],
@@ -190,45 +185,40 @@ class _ThankYouPageState extends State<ThankYouPage> {
                                         ),
                                         child: Text(
                                           '${lastOrder?.quantity[i]}',
-                                          style: TextStyle(
-                                            color: GlobalVariables
-                                                .selectedNavBarColor,
-                                          ),
+                                          style: const TextStyle(
+                                              color: Colors.black),
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                          left: 15,
-                                        ),
-                                        child: const Text(
-                                          'Total Price :',
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.only(
-                                          right: 15,
-                                        ),
-                                        child: Text(
-                                          '₹ ${lastOrder?.totalPrice}',
-                                          style: TextStyle(
-                                            color: GlobalVariables
-                                                .selectedNavBarColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  const SizedBox(height: 10),
                                 ],
                               ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                    left: 15,
+                                  ),
+                                  child: const Text(
+                                    'Total Price :',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.only(
+                                    right: 15,
+                                  ),
+                                  child: Text(
+                                    '₹ ${lastOrder?.totalPrice}',
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ],
@@ -244,13 +234,19 @@ class _ThankYouPageState extends State<ThankYouPage> {
                     onPressed: () {
                       naviagteToHomeScreen(context);
                     },
-                    child: const Text('Continue Shopping'),
+                    child: const Text(
+                      'Continue Shopping',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
                   ElevatedButton(
                     onPressed: () {
                       navigateToMyOrdersScreen(context);
                     },
-                    child: const Text('My Orders'),
+                    child: const Text(
+                      'My Orders',
+                      style: TextStyle(color: Colors.black),
+                    ),
                   ),
                 ],
               ),
