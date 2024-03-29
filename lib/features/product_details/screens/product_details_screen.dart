@@ -185,14 +185,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               color: Colors.black12,
               height: 5,
             ),
-            // Padding(
-            //   padding: const EdgeInsets.all(10.0),
-            //   child: CustomButton(
-            //     text: 'Buy Now',
-            //     onTap: () {},
-            //   ),
-            // ),
-            // const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: CustomButton(
@@ -201,6 +193,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   addToCart();
                   navigateToCartScreen();
                 },
+                color: GlobalVariables.customCyan,
               ),
             ),
             const SizedBox(height: 8),

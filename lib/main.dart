@@ -52,7 +52,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
           scaffoldBackgroundColor: GlobalVariables.backgroundColor,
           colorScheme: const ColorScheme.light(
-            primary: GlobalVariables.customCyan,
+            primary: Colors.cyan,
           ),
           appBarTheme: const AppBarTheme(
               elevation: 0,
@@ -63,9 +63,9 @@ class _MyAppState extends State<MyApp> {
       onGenerateRoute: (settings) => generateRoute(settings),
       home: Scaffold(
         body: Provider.of<UserProvider>(context).user.token.isNotEmpty
-            ? Provider.of<UserProvider>(context).user.type == "user"
-                ? const HomeScreen()
-                : const AdminScreen()
+            ? Provider.of<UserProvider>(context).user.type == "admin"
+                ? const AdminScreen()
+                : const HomeScreen()
             : const SignInScreen(),
       ),
     );

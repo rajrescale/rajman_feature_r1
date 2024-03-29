@@ -231,11 +231,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Stepper(
                   currentStep: currentStep,
                   controlsBuilder: (context, details) {
-                    print('currentStep: ${currentStep}');
                     if (user.type == 'admin' || user.type == 'Admin') {
                       return CustomButton(
                         text: 'Done',
                         onTap: () => changeOrderStatus(details.currentStep),
+                        color: GlobalVariables.customCyan,
                       );
                     }
                     return const SizedBox();
