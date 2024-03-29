@@ -1,3 +1,4 @@
+import 'package:dalvi/common/widgets/custom_button.dart';
 import 'package:dalvi/common/widgets/custom_textfield.dart';
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/address/services/address_services.dart';
@@ -200,25 +201,21 @@ class _AddressScreenState extends State<AddressScreen> {
                 ),
               ),
               const SizedBox(height: 10),
-              ElevatedButton(
-                  onPressed: () => {
-                        if (cart.isNotEmpty)
-                          {
-                            payPressed(address),
-                            cashOnDelivery(address),
-                          }
-                        else
-                          {
-                            {showSnackBar(context, 'Select Product!')},
-                          }
-                      },
-                  child: const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      "Place Order",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ))
+              CustomButton(
+                onTap: () => {
+                  if (cart.isNotEmpty)
+                    {
+                      payPressed(address),
+                      cashOnDelivery(address),
+                    }
+                  else
+                    {
+                      {showSnackBar(context, 'Select Product!')},
+                    }
+                },
+                text: "Place Order",
+                color: GlobalVariables.customCyan,
+              )
             ],
           ),
         ),

@@ -72,6 +72,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       CustomTextField(
                         controller: _passwordController,
                         hintText: "Password",
+                        obscureText: true,
                       ),
                       const SizedBox(
                         height: 10,
@@ -91,13 +92,13 @@ class _SignInScreenState extends State<SignInScreen> {
                         height: 10,
                       ),
                       CustomButton(
-                        text: 'sign in',
-                        onTap: () {
-                          if (_signInFormKey.currentState!.validate()) {
-                            signInUser();
-                          }
-                        },
-                      ),
+                          text: 'sign in',
+                          onTap: () {
+                            if (_signInFormKey.currentState!.validate()) {
+                              signInUser();
+                            }
+                          },
+                          color: GlobalVariables.customCyan),
                       const SizedBox(
                         height: 10,
                       ),

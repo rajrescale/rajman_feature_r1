@@ -14,7 +14,7 @@ class GlobalVariables {
   );
 
   // static const secondaryColor = Color.fromRGBO(255, 153, 0, 1);
-  static const Color customCyan = Color.fromARGB(255, 29, 201, 192);
+  static const Color customCyan = Color.fromARGB(255, 156, 231, 228);
   static const secondaryColor = Color.fromARGB(255, 125, 221, 216);
   static const backgroundColor = Colors.white;
   static const Color greyBackgroundCOlor = Color(0xffebecee);

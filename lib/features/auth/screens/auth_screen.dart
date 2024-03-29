@@ -118,13 +118,13 @@ class _AuthScreenState extends State<AuthScreen> {
                           height: 10,
                         ),
                         CustomButton(
-                          text: 'Sign Up',
-                          onTap: () {
-                            if (_signUpFormKey.currentState!.validate()) {
-                              signUpUser();
-                            }
-                          },
-                        )
+                            text: 'Sign Up',
+                            onTap: () {
+                              if (_signUpFormKey.currentState!.validate()) {
+                                signUpUser();
+                              }
+                            },
+                            color: GlobalVariables.customCyan)
                       ],
                     ),
                   ),

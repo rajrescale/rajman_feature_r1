@@ -81,6 +81,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       CustomTextField(
                         controller: _passwordController,
                         hintText: "Password",
+                        obscureText: true,
                       ),
                       const SizedBox(
                         height: 10,
@@ -97,6 +98,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             );
                           }
                         },
+                        color: GlobalVariables.customCyan,
                       ),
                       const SizedBox(
                         height: 10,
