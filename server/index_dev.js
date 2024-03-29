@@ -10,8 +10,8 @@ const cors = require("cors");
 //  INIT
 
 
-// const PORT = 80;
 const PORT = 80;
+// const PORT = 3000;
 
 const app = express();
 const DB =
@@ -23,6 +23,9 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   next();
 });
+
+
+
 app.use(express.json());
 app.use(cors());
 app.use(authRouter);
