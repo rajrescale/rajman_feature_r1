@@ -45,7 +45,7 @@ class AuthService {
         onSuccess: () {
           showSnackBar(
             context,
-            'Account created! Login with the same credentials!',
+            'Signup Successfully!',
           );
         },
       );
