@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:dalvi/constants/error_handling.dart';
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/constants/utils.dart';
-import 'package:dalvi/features/auth/screens/auth_screen.dart';
+import 'package:dalvi/features/auth/screens/signin.dart';
 import 'package:dalvi/models/order.dart';
 import 'package:dalvi/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +51,7 @@ class AccountServices {
       await sharedPreferences.setString('x-auth-token', '');
       Navigator.pushNamedAndRemoveUntil(
         context,
-        AuthScreen.routeName,
+        SignInScreen.routeName,
         (route) => false,
       );
     } catch (e) {

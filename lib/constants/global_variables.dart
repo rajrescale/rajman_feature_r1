@@ -1,9 +1,7 @@
 import "package:flutter/material.dart";
 
-
 // String uri = 'https://us-central1-offers-6e772.cloudfunctions.net/app';
-String uri = 'https://localhost';
-
+String uri = 'http://localhost';
 
 class GlobalVariables {
   // colors
@@ -16,6 +14,7 @@ class GlobalVariables {
   );
 
   // static const secondaryColor = Color.fromRGBO(255, 153, 0, 1);
+  static const Color customCyan = Color.fromARGB(255, 29, 201, 192);
   static const secondaryColor = Color.fromARGB(255, 125, 221, 216);
   static const backgroundColor = Colors.white;
   static const Color greyBackgroundCOlor = Color(0xffebecee);
