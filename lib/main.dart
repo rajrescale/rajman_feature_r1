@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/admin/screens/admin_screen.dart';
 import 'package:dalvi/features/auth/screens/auth_screen.dart';
@@ -8,7 +10,18 @@ import 'package:dalvi/router.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// Custom HTTP client that bypasses SSL certificate validation errors
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 void main() {
+  HttpOverrides.global = MyHttpOverrides();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
