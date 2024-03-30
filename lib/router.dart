@@ -2,7 +2,8 @@ import 'package:dalvi/common/widgets/bottom_bar.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/address/screens/address_screen.dart';
 import 'package:dalvi/features/admin/screens/add_products_screen.dart';
-import 'package:dalvi/features/auth/screens/auth_screen.dart';
+import 'package:dalvi/features/auth/screens/register.dart';
+import 'package:dalvi/features/auth/screens/signin.dart';
 
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
 
@@ -17,10 +18,15 @@ import 'package:flutter/material.dart';
 
 Route<dynamic> generateRoute(RouteSettings routeSettings) {
   switch (routeSettings.name) {
-    case AuthScreen.routeName:
+    case SignInScreen.routeName:
       return MaterialPageRoute(
         settings: routeSettings,
-        builder: (_) => const AuthScreen(),
+        builder: (_) => const SignInScreen(),
+      );
+    case SignUpScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const SignUpScreen(),
       );
 
     case HomeScreen.routeName:
