@@ -5,6 +5,7 @@ import 'package:dalvi/features/admin/screens/posts_screen.dart';
 import 'package:flutter/material.dart';
 
 class AdminScreen extends StatefulWidget {
+  static const String routeName = '/admin';
   const AdminScreen({super.key});
 
   @override

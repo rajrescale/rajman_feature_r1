@@ -2,6 +2,7 @@ import 'package:dalvi/common/widgets/bottom_bar.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/address/screens/address_screen.dart';
 import 'package:dalvi/features/admin/screens/add_products_screen.dart';
+import 'package:dalvi/features/admin/screens/admin_screen.dart';
 import 'package:dalvi/features/auth/screens/register.dart';
 import 'package:dalvi/features/auth/screens/signin.dart';
 
@@ -16,7 +17,8 @@ import 'package:dalvi/models/order.dart';
 import 'package:dalvi/models/product.dart';
 import 'package:flutter/material.dart';
 
-Route<dynamic> generateRoute(RouteSettings routeSettings) {
+Route<dynamic> generateRoute(
+    RouteSettings routeSettings, BuildContext context) {
   switch (routeSettings.name) {
     case SignInScreen.routeName:
       return MaterialPageRoute(
@@ -44,6 +46,11 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
       return MaterialPageRoute(
         settings: routeSettings,
         builder: (_) => const CartScreen(),
+      );
+    case AdminScreen.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const AdminScreen(),
       );
     case AddressScreen.routeName:
       var totalAmount = routeSettings.arguments as String;

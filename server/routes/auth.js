@@ -26,9 +26,12 @@ authRouter.post("/api/signup", async (req, res) => {
       name,
     });
     user = await user.save();
-    res.json(user);
-    // post that data in database
-    // return that data to the user
+
+    // Generate JWT token
+    const userJwtGenerate = await User.findOne({ email: email });
+    const token = jwt.sign({ id: userJwtGenerate._id }, "passwordKey");
+
+    res.json({ token, ...user._doc });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
