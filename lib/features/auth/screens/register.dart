@@ -3,7 +3,6 @@ import 'package:dalvi/common/widgets/custom_textfield.dart';
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/auth/screens/signin.dart';
 import 'package:dalvi/features/auth/services/auth_service.dart';
-import 'package:dalvi/features/home/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -91,11 +90,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onTap: () {
                           if (_signUpFormKey.currentState!.validate()) {
                             signUpUser();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const HomeScreen()),
-                            );
                           }
                         },
                         color: GlobalVariables.customCyan,
@@ -113,15 +107,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignInScreen()),
-                                );
+                                Navigator.pushNamed(
+                                    context, SignInScreen.routeName);
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //     builder: (context) => const SignInScreen(),
+                                //   ),
+                                // );
                               },
                               child: const Text(
-                                "Sigin",
+                                " Sigin",
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 29, 201, 192),
                                 ),

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dalvi/constants/error_handling.dart';
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/constants/utils.dart';
+import 'package:dalvi/features/admin/screens/admin_screen.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
 import 'package:dalvi/providers/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -38,15 +39,19 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-// print(res.body);
       httpErrorHandle(
         response: res,
         context: context,
-        onSuccess: () {
+        onSuccess: () async {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          Provider.of<UserProvider>(context, listen: false).setUser(res.body);
+          await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
           showSnackBar(
             context,
             'Signup Successfully!',
           );
+
+          Navigator.pushReplacementNamed(context, HomeScreen.routeName);
         },
       );
     } catch (e) {
@@ -54,7 +59,7 @@ class AuthService {
     }
   }
 
-//  sign In user
+// sign In user
   void signInUser({
     required BuildContext context,
     required String email,
@@ -71,7 +76,7 @@ class AuthService {
           'Content-Type': 'application/json; charset=UTF-8',
         },
       );
-      // print(res.body);
+
       httpErrorHandle(
         response: res,
         context: context,
@@ -79,11 +84,24 @@ class AuthService {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           Provider.of<UserProvider>(context, listen: false).setUser(res.body);
           await prefs.setString('x-auth-token', jsonDecode(res.body)['token']);
-          Navigator.pushNamedAndRemoveUntil(
-            context,
-            HomeScreen.routeName,
-            (route) => false,
-          );
+
+          Future.microtask(() {
+            final userType =
+                Provider.of<UserProvider>(context, listen: false).user.type;
+            if (userType == "admin") {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                AdminScreen.routeName,
+                (route) => false,
+              );
+            } else if (userType == "user") {
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                HomeScreen.routeName,
+                (route) => false,
+              );
+            }
+          });
         },
       );
     } catch (e) {

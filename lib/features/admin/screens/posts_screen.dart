@@ -55,7 +55,7 @@ class _PostsScreenState extends State<PostsScreen> {
               itemBuilder: (context, index) {
                 final productData = products![index];
                 return Padding(
-                  padding: EdgeInsets.only(left: 15, right: 15),
+                  padding: const EdgeInsets.only(left: 15, right: 15),
                   child: Column(
                     children: [
                       const SizedBox(

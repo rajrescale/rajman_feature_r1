@@ -4,7 +4,6 @@ import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/auth/screens/register.dart';
 import 'package:dalvi/features/auth/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class SignInScreen extends StatefulWidget {
   static const String routeName = '/signin';
@@ -112,12 +111,14 @@ class _SignInScreenState extends State<SignInScreen> {
                             cursor: SystemMouseCursors.click,
                             child: GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const SignUpScreen()),
-                                );
+                                Navigator.pushNamed(
+                                    context, SignUpScreen.routeName);
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(
+                                //       builder: (context) =>
+                                //           const SignUpScreen()),
+                                // );
                               },
                               child: const Text(
                                 "Signup",

@@ -60,7 +60,7 @@ class _MyAppState extends State<MyApp> {
               iconTheme: IconThemeData(
                 color: Colors.black,
               ))),
-      onGenerateRoute: (settings) => generateRoute(settings),
+      onGenerateRoute: (settings) => generateRoute(settings, context),
       home: Scaffold(
         body: Provider.of<UserProvider>(context).user.token.isNotEmpty
             ? Provider.of<UserProvider>(context).user.type == "admin"
