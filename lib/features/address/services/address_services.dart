@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 class AddressServices {
-  void saveUserAddress({
+  Future<void> saveUserAddress({
     required BuildContext context,
     required String address,
   }) async {
@@ -32,7 +32,7 @@ class AddressServices {
         response: res,
         context: context,
         onSuccess: () {
-          User user = userProvider.user.copyWith(
+          Users user = userProvider.user.copyWith(
             address: jsonDecode(res.body)['address'],
           );
 
@@ -67,7 +67,7 @@ class AddressServices {
         context: context,
         onSuccess: () {
           showSnackBar(context, 'Your order has been placed!');
-          User user = userProvider.user.copyWith(
+          Users user = userProvider.user.copyWith(
             cart: [],
           );
           userProvider.setUserFromModel(user);

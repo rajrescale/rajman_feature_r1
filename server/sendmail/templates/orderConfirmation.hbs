@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+  <html lang="en">
+  
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Order Confirmation</title>
+      <style>
+          /* Add your CSS styles here */
+          body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+          }
+  
+          .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+          }
+  
+          .order-details {
+              margin-bottom: 20px;
+          }
+  
+          .order-items {
+              margin-bottom: 20px;
+          }
+  
+          .item {
+              border-bottom: 1px solid #ccc;
+              padding: 10px 0;
+          }
+  
+          .item:last-child {
+              border-bottom: none;
+          }
+  
+          .item-details {
+              display: flex;
+              justify-content: space-between;
+              gap: 20px;
+              
+          }
+  
+          .item-name {
+              font-weight: bold;
+          }
+  
+          .total-price {
+              font-size: 18px;
+          }
+  
+          .contact-info {
+              margin-bottom: 20px;
+          }
+          .item-total{
+              font-weight: bold;
+              font-size: 18px;
+          }
+      
+      </style>
+  </head>
+  
+  <body>
+  
+      <div class="container">
+      
+         
+          <h2>Order Confirmation</h2>
+  
+          <div class="order-details">
+              <p><strong>Order Id:</strong> {{order._id}}</p>
+              <p> Placed on {{dayName}}, {{month}} {{dayOfMonth}} </p>
+              <p><strong>Order Status:</strong> Confirmed</p>
+              </div>
+              
+              <p>Order will be delivered in approximately <strong>2-3 Days</strong> </p>
+          <div class="order-items">
+              <h3> Items</h3>              
+            {{#each order.products}}
+       <div class="item-details">
+        <div style="display: flex;">
+
+    <img src="{{this.product.images.[0]}}" style="width: 100px; height: 100px; object-fit: contain; margin-right:20px;" />
+    <div style="margin-right: 15px;">
+        
+    <span class="item-name">{{this.product.name}}</span>
+    <span class="item-size">({{this.sizeAndPrice.size}})</span>
+    </div>
+
+        </div>
+    <div class="item-details-price">
+        <span class="item-price1" style="margin-right: 15px;">X</span>
+        <span class="item-price1" >{{this.quantity}}</span>
+        <span class="item-price2" >x</span>
+        <span class="item-price3">  {{formatAmount this.sizeAndPrice.price}}</span>
+
+        <p class="item-total" style="margin-right: 50px;"> <b> ₹{{this.totalPrice}}</b></p>
+    </div>
+</div>
+
+            {{/each}}
+              <!-- Add more items if necessary -->
+          </div>
+  
+          <p class="total-price">Total Price:<strong> {{formatAmount total}}</strong></p>
+  
+          <div class="shipping-address">
+              <h3>Shipping Address</h3>
+              <p>{{user.name}}</p>
+             <p>{{user.address}}</p>
+          </div>
+  
+          <div class="billing-info">
+              <h3>Billing Information</h3>
+              <p>Same as shipping address</p>
+          </div>
+  
+          <div class="payment-method">
+              <h3>Payment Method</h3>
+              <p>Cash On Delivery</p>
+          </div>
+  
+          <div class="contact-info">
+              <h3>Contact Information</h3>
+              <p>If you have any questions or concerns, please contact us orders@dalvifarms.com!</p>
+          </div>
+  
+          <p>Thank you for your purchase!</p>
+  
+      </div>
+  
+  </body>
+  
+  </html>

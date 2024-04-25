@@ -1,9 +1,11 @@
-import 'package:dalvi/common/widgets/bottom_bar.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/address/screens/address_screen.dart';
+import 'package:dalvi/features/address/screens/order_confirm.dart';
 import 'package:dalvi/features/admin/screens/add_products_screen.dart';
 import 'package:dalvi/features/admin/screens/admin_screen.dart';
+import 'package:dalvi/features/auth/screens/phone_validation.dart';
 import 'package:dalvi/features/auth/screens/register.dart';
+import 'package:dalvi/features/auth/screens/update_password.dart';
 import 'package:dalvi/features/auth/screens/signin.dart';
 
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
@@ -25,12 +27,23 @@ Route<dynamic> generateRoute(
         settings: routeSettings,
         builder: (_) => const SignInScreen(),
       );
-    case SignUpScreen.routeName:
+    case PhoneValidation.routeName:
       return MaterialPageRoute(
         settings: routeSettings,
-        builder: (_) => const SignUpScreen(),
+        builder: (_) => const PhoneValidation(),
       );
 
+    case UpdatePassword.routeName:
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => const UpdatePassword(),
+      );
+    case SignUpScreen.routeName:
+      final String phoneNumber = routeSettings.arguments as String;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => SignUpScreen(phone: phoneNumber),
+      );
     case HomeScreen.routeName:
       return MaterialPageRoute(
         settings: routeSettings,
@@ -66,12 +79,6 @@ Route<dynamic> generateRoute(
         builder: (_) => const AddProductScreen(),
       );
 
-    case BottomBar.routeName:
-      return MaterialPageRoute(
-        settings: routeSettings,
-        builder: (_) => const BottomBar(),
-      );
-
     case OrderDetailScreen.routeName:
       var order = routeSettings.arguments as Order;
       return MaterialPageRoute(
@@ -99,6 +106,12 @@ Route<dynamic> generateRoute(
         ),
       );
 
+    case ConfirmOrder.routeName:
+      var totalAmount = routeSettings.arguments as String;
+      return MaterialPageRoute(
+        settings: routeSettings,
+        builder: (_) => ConfirmOrder(totalAmount: totalAmount),
+      );
     case ThankYouPage.routeName:
       return MaterialPageRoute(
         settings: routeSettings,

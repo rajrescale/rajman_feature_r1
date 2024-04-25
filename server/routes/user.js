@@ -4,30 +4,67 @@ const auth = require("../middlewares/auth.js");
 const Order = require("../models/order");
 const { Product } = require("../models/product.js");
 const User = require("../models/user.js");
+const orderPlacedMail = require("../sendmail/orderPlacedMail.js");
 
 userRouter.post("/api/add-to-cart", auth, async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, sizeIndex } = req.body;
     const product = await Product.findById(id);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
     let user = await User.findById(req.user);
 
-    if (user.cart.length == 0) {
-      user.cart.push({ product, quantity: 1 });
+    const sizeAndPrice = product?.sizesAndPrices?.[sizeIndex];
+
+    if (user.cart.length === 0) {
+      user.cart.push({ product, quantity: 1, sizeAndPrice });
     } else {
       let isProductFound = false;
+
       for (let i = 0; i < user.cart.length; i++) {
-        if (user.cart[i].product._id.equals(product._id)) {
+        var lineItem = user.cart[i];
+        if (lineItem.product._id.equals(product._id) && (lineItem.sizeAndPrice.size === sizeAndPrice.size) ) {
           isProductFound = true;
+          lineItem.quantity += 1;
+          break;
         }
       }
 
-      if (isProductFound) {
-        let producttt = user.cart.find((productt) =>
-          productt.product._id.equals(product._id)
-        );
-        producttt.quantity += 1;
-      } else {
-        user.cart.push({ product, quantity: 1 });
+      if (!isProductFound) {
+        user.cart.push({ product, quantity: 1, sizeAndPrice });
+      }
+    }
+
+    const updatedCart = user.cart.map((item) => ({
+      product: item.product,
+      quantity: item.quantity,
+      sizeAndPrice: item.sizeAndPrice,
+    }));
+    user.cart = updatedCart;
+    user = await user.save();
+
+    res.json(user);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+userRouter.delete("/api/remove-from-cart", auth, async (req, res) => {
+  try {
+    const { id,size } = req.body;
+    const product = await Product.findById(id);
+    let user = await User.findById(req.user);
+
+    for (let i = 0; i < user.cart.length; i++) {
+      if (user.cart[i].product._id.equals(product._id) && (user.cart[i].sizeAndPrice.size === size)) {
+        if (user.cart[i].quantity == 1) {
+          user.cart.splice(i, 1);
+        } else {
+          user.cart[i].quantity -= 1;
+        }
       }
     }
     user = await user.save();
@@ -36,37 +73,16 @@ userRouter.post("/api/add-to-cart", auth, async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 });
-// userRouter.post("/api/buynow", auth, async (req, res) => {
-//   try {
-//     const { id } = req.body;
-//     const product = await Product.findById(id);
-
-//     let user = await User.findById(req.user);
-
-//     user.cart.push({ product, quantity: 1 });
-
-//     user = await user.save();
-
-//     res.json(user);
-
-//   } catch (e) {
-//     res.status(500).json({ error: e.message });
-//   }
-// });
-
-userRouter.delete("/api/remove-from-cart/:id", auth, async (req, res) => {
+userRouter.post("/api/increase-product", auth, async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id,size } = req.body;
     const product = await Product.findById(id);
     let user = await User.findById(req.user);
 
+
     for (let i = 0; i < user.cart.length; i++) {
-      if (user.cart[i].product._id.equals(product._id)) {
-        if (user.cart[i].quantity == 1) {
-          user.cart.splice(i, 1);
-        } else {
-          user.cart[i].quantity -= 1;
-        }
+      if (user.cart[i].product._id.equals(product._id) && (user.cart[i].sizeAndPrice.size === size)) {
+        user.cart[i].quantity += 1;
       }
     }
     user = await user.save();
@@ -89,54 +105,69 @@ userRouter.post("/api/save-user-address", auth, async (req, res) => {
   }
 });
 
-// order product
 userRouter.post("/api/order", auth, async (req, res) => {
   try {
     const { cart, totalPrice, address } = req.body;
     let products = [];
 
+    // Process each item in the cart
     for (let i = 0; i < cart.length; i++) {
-      let product = await Product.findById(cart[i].product._id);
-      if (product.quantity >= cart[i].quantity) {
-        product.quantity -= cart[i].quantity;
-        products.push({ product, quantity: cart[i].quantity });
-        await product.save();
-      } else {
+      const product = await Product.findById(cart[i].product._id);
+      if (!product || product.quantity < cart[i].quantity) {
         return res
           .status(400)
           .json({ msg: `${product.name} is out of stock!` });
       }
+      // Update product quantity and push to products array
+      product.quantity -= cart[i].quantity;
+      let price = cart[i].sizeAndPrice["price"];
+      let size = cart[i].sizeAndPrice["size"];
+
+      products.push({
+        product,
+        quantity: cart[i].quantity,
+        sizeAndPrice: { price, size },
+      });
+      await product.save();
     }
 
-    let user = await User.findById(req.user);
+    // Clear user's cart after processing the order
+    var user = await User.findById(req.user);
+    var userJson = await user.toJSON();
     user.cart = [];
     user = await user.save();
 
-    let order = new Order({
+    // Create the order
+    var order = new Order({
       products,
       totalPrice,
       address,
       userId: req.user,
       orderedAt: new Date().getTime(),
     });
+    // Save the order to the database
+    order = await order.save();
 
-    // let getAllOrder = await order.find({});
-    // getAllOrder = getAllOrder.unshift(order);
-    // await Order.insertMany(getAllOrder);
-    // order = await order.save();
-    // res.json(order);
-    // Fetch user's existing orders
-    // Fetch user's existing orders
-    let userOrders = await Order.find({ userId: req.user });
+    var orderJson = order.toJSON();
 
-    // Add the new order to the beginning of the list
-    userOrders.unshift(order);
-
-    // Save all orders (including the new one) back to the database
-    await Order.deleteMany({ userId: req.user }); // Clear existing orders
-    await Order.insertMany(userOrders); // Insert all orders
-
-    res.json(order);
+    // Send email when order is placed (without await)
+    orderPlacedMail(userJson, cart, orderJson)
+      .then((emailSent) => {
+        if (emailSent) {
+          res.json(order); // Respond with the created order
+        } else {
+          // If email sending failed, respond with success but include a message
+          res.status(200).json({
+            order,
+            msg: "Order placed successfully but failed to send email",
+          });
+        }
+      })
+      .catch((error) => {
+        // Handle error while sending email
+        console.error("Error sending email:", error);
+        res.json(order); // Respond with the created order even if email sending failed
+      });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }

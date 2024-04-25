@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "184597024407",
+    "project_id": "mango-770ae",
+    "storage_bucket": "mango-770ae.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:184597024407:android:f07ef5f05d1f8e9f9a63d2",
+        "android_client_info": {
+          "package_name": "com.rescale.dalvi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr-VS_lv3bIY4l9J7_1WoTCbnPhxjnja4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

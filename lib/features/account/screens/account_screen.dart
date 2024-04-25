@@ -1,11 +1,11 @@
-import 'package:dalvi/constants/global_variables.dart';
+import 'package:dalvi/features/account/services/account_services.dart';
 import 'package:dalvi/features/account/widgets/orders.dart';
+import 'package:dalvi/features/auth/services/auth_service.dart';
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
 import 'package:dalvi/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:dalvi/features/account/widgets/below_app_bar.dart';
-import 'package:dalvi/features/account/widgets/top_buttons.dart';
 import 'package:provider/provider.dart';
 import 'package:badges/badges.dart' as badges;
 
@@ -15,7 +15,7 @@ double bottomBarBorderWidth = 5;
 
 class AccountScreen extends StatefulWidget {
   static const String routeName = '/account';
-  const AccountScreen({Key? key}) : super(key: key);
+  const AccountScreen({super.key});
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -24,14 +24,15 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
-    final userCartLen = context.watch<UserProvider>().user.cart.length;
+    final userProvider = context.watch<UserProvider>().user;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(50),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              // color:Colors.amber,
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -51,13 +52,23 @@ class _AccountScreenState extends State<AccountScreen> {
               Container(
                 padding: const EdgeInsets.only(left: 15, right: 15),
                 child: Row(
-                  children: const [
-                    Padding(
-                      padding: EdgeInsets.only(right: 15),
-                      child: Icon(Icons.notifications_outlined),
-                    ),
-                    Icon(
-                      Icons.search,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        AccountServices()
+                            .logOut(context); //mongodb remove token
+                        AuthService.logout();
+                      },
+                      child: const Tooltip(
+                        message: "Logout",
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 15),
+                          child: Icon(
+                            Icons.logout_outlined,
+                            size: 30,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -66,16 +77,20 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
         ),
       ),
-      body: Column(
-        children: const [
-          BelowAppBar(),
-          SizedBox(height: 10),
-          TopButtons(),
-          SizedBox(height: 20),
-          Orders(),
-        ],
+      body: const SingleChildScrollView(
+        child: Column(
+          children: [
+            BelowAppBar(),
+            SizedBox(height: 10),
+            // TopButtons(),
+            SizedBox(height: 20),
+            Orders(),
+          ],
+        ),
       ),
-      bottomNavigationBar: buildBottomNavigation(context, userCartLen),
+      bottomNavigationBar: userProvider.token.isNotEmpty
+          ? buildBottomNavigation(context, userProvider.cart.length)
+          : null,
     );
   }
 
@@ -83,9 +98,9 @@ class _AccountScreenState extends State<AccountScreen> {
       BuildContext context, int userCartLen) {
     return BottomNavigationBar(
       currentIndex: _page,
-      selectedItemColor: GlobalVariables.selectedNavBarColor,
-      unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-      backgroundColor: GlobalVariables.backgroundColor,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconSize: 28,
       onTap: (index) {
         if (index != _page) {
@@ -101,8 +116,8 @@ class _AccountScreenState extends State<AccountScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 0
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -126,8 +141,8 @@ class _AccountScreenState extends State<AccountScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 1
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -151,8 +166,8 @@ class _AccountScreenState extends State<AccountScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 2
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -194,19 +209,19 @@ class _AccountScreenState extends State<AccountScreen> {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AccountScreen()),
+          MaterialPageRoute(builder: (context) => const AccountScreen()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CartScreen()),
+          MaterialPageRoute(builder: (context) => const CartScreen()),
         );
         break;
     }

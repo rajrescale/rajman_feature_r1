@@ -2,10 +2,12 @@ import 'package:dalvi/models/user.dart';
 import 'package:flutter/material.dart';
 
 class UserProvider extends ChangeNotifier {
-  User _user = User(
+  Users _user = Users(
     id: '',
     name: '',
     email: '',
+    otp: [],
+    phone: '',
     password: '',
     address: '',
     type: '',
@@ -13,14 +15,14 @@ class UserProvider extends ChangeNotifier {
     cart: [],
   );
 
-  User get user => _user;
+  Users get user => _user;
 
   void setUser(String user) {
-    _user = User.fromJson(user);
+    _user = Users.fromJson(user);
     notifyListeners();
   }
 
-  void setUserFromModel(User user) {
+  void setUserFromModel(Users user) {
     _user = user;
     notifyListeners();
   }

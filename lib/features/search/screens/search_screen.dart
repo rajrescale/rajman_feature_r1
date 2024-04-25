@@ -1,5 +1,4 @@
 import 'package:dalvi/common/widgets/loader.dart';
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
@@ -13,15 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:badges/badges.dart' as badges;
 import 'package:provider/provider.dart';
 
-
 // import 'package:dalvi/features/home/screens/home_screen.dart';
 class SearchScreen extends StatefulWidget {
   static const String routeName = '/search-screen';
   final String searchQuery;
   const SearchScreen({
-    Key? key,
+    super.key,
     required this.searchQuery,
-  }) : super(key: key);
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -47,7 +45,7 @@ class _SearchScreenState extends State<SearchScreen> {
     Navigator.pushNamed(context, SearchScreen.routeName, arguments: query);
   }
 
-  int _page = 0;
+  final int _page = 0;
   double bottomBarWidth = 42;
   double bottomBarBorderWidth = 5;
 
@@ -59,8 +57,8 @@ class _SearchScreenState extends State<SearchScreen> {
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -71,11 +69,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   height: 42,
                   margin: const EdgeInsets.only(left: 15),
                   child: Material(
-                    borderRadius: BorderRadius.circular(7),
+                    borderRadius: BorderRadius.circular(50),
                     elevation: 1,
                     child: TextFormField(
                       onFieldSubmitted: navigateToSearchScreen,
                       decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                              7), // Set the border radius here
+                        ),
                         prefixIcon: InkWell(
                           onTap: () {},
                           child: const Padding(
@@ -90,14 +92,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           ),
                         ),
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).primaryColorDark,
                         contentPadding: const EdgeInsets.only(top: 10),
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(7),
-                          ),
-                          borderSide: BorderSide.none,
-                        ),
                         enabledBorder: const OutlineInputBorder(
                           borderRadius: BorderRadius.all(
                             Radius.circular(7),
@@ -148,8 +144,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ],
             ),
-    bottomNavigationBar: buildBottomNavigation(context, userCartLen),
-
+      bottomNavigationBar: buildBottomNavigation(context, userCartLen),
     );
   }
 
@@ -158,11 +153,11 @@ class _SearchScreenState extends State<SearchScreen> {
     return BottomNavigationBar(
       currentIndex: _page,
       selectedItemColor: Colors.black87,
-      unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-      backgroundColor: GlobalVariables.backgroundColor,
+      unselectedItemColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconSize: 28,
       onTap: (index) {
-          performTap(index);
+        performTap(index);
       },
       items: [
         // HOME
@@ -174,7 +169,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 top: BorderSide(
                   color: _page == 0
                       ? Colors.white
-                      : GlobalVariables.backgroundColor,
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -198,8 +193,8 @@ class _SearchScreenState extends State<SearchScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 1
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -223,8 +218,8 @@ class _SearchScreenState extends State<SearchScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 2
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),

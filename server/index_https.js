@@ -7,14 +7,11 @@ const productRouter = require("./routes/product.js");
 const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
 const cors = require("cors");
-const https = require("https");
-const fs = require("fs");
-const PORT = 443;
+const PORT = 3001;
 const app = express();
 const DB =
   process.env.MONGODB_URI ||
   "mongodb+srv://rajmanbind3535:FuCAVzw1GxtDWSUE@cluster0.g0b73gw.mongodb.net/myDataBase?retryWrites=true&w=majority";
-
 
 // Middleware to log request details
 app.use((req, res, next) => {
@@ -22,6 +19,8 @@ app.use((req, res, next) => {
   next();
 });
 // middleware
+
+// Route handler for main request
 app.use(cors());
 app.use(express.json());
 app.use(authRouter);
@@ -39,20 +38,8 @@ mongoose
     console.log(e);
   });
 
-
-const server = https.createServer(
-{
-    key: fs.readFileSync("../certificate/key.pem"),
-    cert: fs.readFileSync("../certificate/cert.pem"),
-},  
-  app
-);
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`connected at port ${PORT} `);
 });
 
-// app.listen(PORT, "0.0.0.0", () => {
-//   console.log(`connected at port ${PORT} `);
-// });
-
-// module.exports = app;
+module.exports = app;

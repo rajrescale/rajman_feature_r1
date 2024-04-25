@@ -1,6 +1,6 @@
 import 'package:dalvi/common/widgets/custom_button.dart';
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/admin/services/admin_services.dart';
+import 'package:dalvi/features/home/screens/home_screen.dart';
 import 'package:dalvi/features/search/screens/search_screen.dart';
 import 'package:dalvi/models/order.dart';
 import 'package:dalvi/providers/user_provider.dart';
@@ -12,16 +12,16 @@ class OrderDetailScreen extends StatefulWidget {
   static const String routeName = '/order-details';
   final Order order;
   const OrderDetailScreen({
-    Key? key,
+    super.key,
     required this.order,
-  }) : super(key: key);
+  });
 
   @override
   State<OrderDetailScreen> createState() => _OrderDetailScreenState();
 }
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
-  int currentStep = 1;
+  int currentStep = 0;
   final AdminServices adminServices = AdminServices();
 
   void navigateToSearchScreen(String query) {
@@ -31,9 +31,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.order.status > 1) {
-      currentStep = widget.order.status;
-    }
+    currentStep = widget.order.status;
   }
 
   // !!! ONLY FOR ADMIN!!!
@@ -44,12 +42,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     // Call the admin service to change order status
     adminServices.changeOrderStatus(
       context: context,
-      status: status + 1,
+      status: status < 2 ? status + 1 : status,
       lastUpdate: currentTime,
       order: widget.order,
       onSuccess: () {
         setState(() {
-          currentStep += 1;
+          if (currentStep < 2) {
+            currentStep += 1;
+          }
         });
       },
     );
@@ -63,8 +63,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -160,7 +160,15 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           widget.order.orderedAt),
                     )}'),
                     Text('Order ID:          ${widget.order.id}'),
-                    Text('Order Total:      ₹ ${widget.order.totalPrice}'),
+                    Row(
+                      children: [
+                        const Text('Order Total:     '),
+                        Text(
+                          '₹ ${widget.order.totalPrice}',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -182,34 +190,58 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     for (int i = 0; i < widget.order.products.length; i++)
-                      Row(
-                        children: [
-                          Image.network(
-                            widget.order.products[i].images[0],
-                            height: 120,
-                            width: 120,
-                          ),
-                          const SizedBox(width: 5),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.order.products[i].name,
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  'Qty: ${widget.order.quantity[i]}',
-                                ),
-                              ],
+                      InkWell(
+                        onTap: () {
+                          Navigator.pushNamedAndRemoveUntil(
+                            context,
+                            HomeScreen.routeName,
+                            (route) => false,
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Image.network(
+                              widget.order.products[i].product.images[0],
+                              height: 120,
+                              width: 120,
                             ),
-                          ),
-                        ],
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        widget.order.products[i].product.name,
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        ' (${widget.order.products[i].sizeAndPrice.size})',
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                  Text(
+                                    'Price: ₹ ${widget.order.products[i].sizeAndPrice.price}',
+                                  ),
+                                  Text(
+                                    'Qty: ${widget.order.products[i].quantity}',
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                   ],
                 ),
@@ -223,6 +255,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Container(
+                height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
                   border: Border.all(
                     color: Colors.black12,
@@ -230,12 +263,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
                 child: Stepper(
                   currentStep: currentStep,
+                  physics: const ClampingScrollPhysics(),
                   controlsBuilder: (context, details) {
                     if (user.type == 'admin' || user.type == 'Admin') {
                       return CustomButton(
                         text: 'Done',
                         onTap: () => changeOrderStatus(details.currentStep),
-                        color: GlobalVariables.customCyan,
+                        // color: GlobalVariables.customCyan,
                       );
                     }
                     return const SizedBox();
@@ -246,8 +280,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       content: const Text(
                         'Your order is Placed',
                       ),
-                      isActive: currentStep > 0,
-                      state: currentStep > 0
+                      isActive: currentStep >= 0,
+                      state: currentStep >= 0
                           ? StepState.complete
                           : StepState.indexed,
                     ),
@@ -256,8 +290,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       content: const Text(
                         'Payment Received , Ready to Deliverd',
                       ),
-                      isActive: currentStep > 1,
-                      state: currentStep > 1
+                      isActive: currentStep >= 0,
+                      state: currentStep >= 1
                           ? StepState.complete
                           : StepState.indexed,
                     ),
@@ -266,46 +300,41 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       content: const Text(
                         'Product Delivered',
                       ),
-                      isActive: currentStep > 2,
-                      state: currentStep > 2
+                      isActive: currentStep >= 0,
+                      state: currentStep >= 2
                           ? StepState.complete
                           : StepState.indexed,
                     ),
-                    Step(
-                      title: const Text('Refunded'),
-
-                      // TODO
-                      content: const Text(
-                        'Refunded',
-                      ),
-                      isActive: currentStep > 3,
-                      state: currentStep > 3
-                          ? StepState.complete
-                          : StepState.indexed,
-                    ),
-                    Step(
-                      title: const Text('Cancelled'),
-
-                      // TODO
-                      content: const Text(
-                        'Cancelled',
-                      ),
-                      isActive: currentStep > 4,
-                      state: currentStep > 4
-                          ? StepState.complete
-                          : StepState.indexed,
-                    ),
-                    Step(
-                      title: const Text('Complaint'),
-                      // TODO
-                      content: const Text(
-                        'Complaint',
-                      ),
-                      isActive: currentStep == 5,
-                      state: currentStep == 5
-                          ? StepState.complete
-                          : StepState.indexed,
-                    ),
+                    // Step(
+                    //   title: const Text('Complaint'),
+                    //   content: const Text(
+                    //     'Complaint',
+                    //   ),
+                    //   isActive: currentStep >= 0,
+                    //   state: currentStep >= 3
+                    //       ? StepState.complete
+                    //       : StepState.indexed,
+                    // ),
+                    // Step(
+                    //   title: const Text('Cancelled'),
+                    //   content: const Text(
+                    //     'Cancelled',
+                    //   ),
+                    //   isActive: currentStep >= 0,
+                    //   state: currentStep >= 4
+                    //       ? StepState.complete
+                    //       : StepState.indexed,
+                    // ),
+                    // Step(
+                    //   title: const Text('Refunded'),
+                    //   content: const Text(
+                    //     'Refunded',
+                    //   ),
+                    //   isActive: currentStep >= 0,
+                    //   state: currentStep >= 5
+                    //       ? StepState.complete
+                    //       : StepState.indexed,
+                    // ),
                   ],
                 ),
               ),

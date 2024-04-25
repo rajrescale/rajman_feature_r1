@@ -1,4 +1,3 @@
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
 import 'package:dalvi/features/home/screens/product_list.dart';
@@ -17,7 +16,7 @@ double bottomBarBorderWidth = 5;
 
 class HomeScreen extends StatefulWidget {
   static const String routeName = '/home';
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -59,14 +58,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userCartLen = context.watch<UserProvider>().user.cart.length;
+    final userProvider = context.watch<UserProvider>().user;
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -130,17 +129,23 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const AddressBox(),
+            userProvider.address.isNotEmpty
+                ? const AddressBox()
+                : const Text(""),
             const SizedBox(height: 10),
             // Check if products are not null before displaying ProductList
-            ProductList(products: products ?? []),
+            ProductList(
+              products: products ?? [],
+            ),
             if (isLoading)
               const CircularProgressIndicator(), // Show loading indicator if products are being fetched
             if (errorMessage.isNotEmpty) Text(errorMessage),
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigation(context, userCartLen),
+      bottomNavigationBar: userProvider.token.isNotEmpty
+          ? buildBottomNavigation(context, userProvider.cart.length)
+          : null,
     );
   }
 
@@ -148,9 +153,9 @@ class _HomeScreenState extends State<HomeScreen> {
       BuildContext context, int userCartLen) {
     return BottomNavigationBar(
       currentIndex: _page,
-      selectedItemColor: GlobalVariables.selectedNavBarColor,
-      unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-      backgroundColor: GlobalVariables.backgroundColor,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconSize: 28,
       onTap: (index) {
         if (index != _page) {
@@ -166,15 +171,18 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 0
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
             ),
             child: GestureDetector(
               onTap: () {
-                // performTap(0);
+                if (_page != 0) {
+                  performTap(
+                      0); // Only perform navigation if not already on the home page
+                }
               },
               child: const Icon(
                 Icons.home_outlined,
@@ -191,8 +199,8 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 1
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -216,8 +224,8 @@ class _HomeScreenState extends State<HomeScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 2
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -257,21 +265,23 @@ class _HomeScreenState extends State<HomeScreen> {
   void performTap(int index) {
     switch (index) {
       case 0:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
-        );
+        if (_page != 0) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+          );
+        }
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AccountScreen()),
+          MaterialPageRoute(builder: (context) => const AccountScreen()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CartScreen()),
+          MaterialPageRoute(builder: (context) => const CartScreen()),
         );
         break;
     }

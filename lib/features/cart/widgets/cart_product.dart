@@ -1,3 +1,4 @@
+import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/cart/services/cart_services.dart';
 import 'package:dalvi/features/product_details/services/product_details_services.dart';
 import 'package:dalvi/models/product.dart';
@@ -8,9 +9,9 @@ import 'package:provider/provider.dart';
 class CartProduct extends StatefulWidget {
   final int index;
   const CartProduct({
-    Key? key,
+    super.key,
     required this.index,
-  }) : super(key: key);
+  });
 
   @override
   State<CartProduct> createState() => _CartProductState();
@@ -21,18 +22,13 @@ class _CartProductState extends State<CartProduct> {
       ProductDetailsServices();
   final CartServices cartServices = CartServices();
 
-  void increaseQuantity(Product product) {
-    productDetailsServices.addToCart(
-      context: context,
-      product: product,
-    );
+  void increaseQuantity(Product product, String size) {
+    cartServices.increaseProduct(
+        context: context, product: product, size: size);
   }
 
-  void decreaseQuantity(Product product) {
-    cartServices.removeFromCart(
-      context: context,
-      product: product,
-    );
+  void decreaseQuantity(Product product, String size) {
+    cartServices.removeFromCart(context: context, product: product, size: size);
   }
 
   @override
@@ -40,6 +36,8 @@ class _CartProductState extends State<CartProduct> {
     final productCart = context.watch<UserProvider>().user.cart[widget.index];
     final product = Product.fromMap(productCart['product']);
     final quantity = productCart['quantity'];
+    final price = productCart['sizeAndPrice']['price'];
+    final size = productCart['sizeAndPrice']['size'];
 
     return Column(
       children: [
@@ -55,44 +53,70 @@ class _CartProductState extends State<CartProduct> {
                 height: 135,
                 width: 135,
               ),
-              Column(
-                children: [
-                  Container(
-                    width: 235,
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      product.name,
-                      style: const TextStyle(
-                        fontSize: 16,
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: SizedBox(
+                  // width: 170,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        // width: 100,
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Row(
+                          children: [
+                            Text(
+                              product.name,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              ' ($size)',
+                              style: const TextStyle(
+                                  fontSize: 15,
+                                  // fontWeight: FontWeight.w100,
+                                  color: GlobalVariables.specialGray),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                      maxLines: 2,
-                    ),
-                  ),
-                  Container(
-                    width: 235,
-                    padding: const EdgeInsets.only(left: 10, top: 5),
-                    child: Text(
-                      '₹ ${product.price}',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                      Container(
+                        // width: 100,
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Text(
+                          '  ₹ $price',
+                          // "price",
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                    ),
-                  ),
-                  Container(
-                    width: 235,
-                    padding: const EdgeInsets.only(left: 10, top: 5),
-                    child: const Text(
-                      'In Stock',
-                      style: TextStyle(
-                        color: Colors.teal,
+                      Container(
+                        // width: 100,
+                        padding: const EdgeInsets.only(top: 5),
+                        child: const Text(
+                          'In Stock',
+                          style: TextStyle(
+                            color: GlobalVariables.specialColor,
+                            fontSize: 10,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                      maxLines: 2,
-                    ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              )
             ],
           ),
         ),
@@ -113,7 +137,9 @@ class _CartProductState extends State<CartProduct> {
                 child: Row(
                   children: [
                     InkWell(
-                      onTap: () => decreaseQuantity(product),
+                      onTap: () {
+                        decreaseQuantity(product, size);
+                      },
                       child: Container(
                         width: 35,
                         height: 32,
@@ -140,7 +166,9 @@ class _CartProductState extends State<CartProduct> {
                       ),
                     ),
                     InkWell(
-                      onTap: () => increaseQuantity(product),
+                      onTap: () {
+                        increaseQuantity(product, size);
+                      },
                       child: Container(
                         width: 35,
                         height: 32,

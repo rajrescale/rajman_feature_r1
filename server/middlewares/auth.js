@@ -1,23 +1,24 @@
 const jwt = require("jsonwebtoken");
-
+const dotenv = require("dotenv");
+dotenv.config();
 const auth = async (req, res, next) => {
-    try {
+  try {
     const token = req.header("x-auth-token");
     if (!token)
-    return res.status(401).json({ msg: "No auth token, access deniedd" });
+      return res.status(401).json({ msg: "No auth token, access denied" });
 
-    const verified = jwt.verify(token, "passwordKey");
+    const verified = jwt.verify(token, "passwordKeyDalviFarmsRescaleAPP");
     if (!verified)
-    return res
+      return res
         .status(401)
         .json({ msg: "Token verification failed, authorization denied." });
 
     req.user = verified.id;
     req.token = token;
     next();
-    } catch (err) {
+  } catch (err) {
     res.status(500).json({ error: err.message });
-    }
+  }
 };
 
 module.exports = auth;

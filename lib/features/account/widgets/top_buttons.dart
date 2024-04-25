@@ -1,5 +1,7 @@
 import 'package:dalvi/features/account/services/account_services.dart';
 import 'package:dalvi/features/account/widgets/account_button.dart';
+import 'package:dalvi/features/auth/services/auth_service.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class TopButtons extends StatelessWidget {
@@ -26,7 +28,11 @@ class TopButtons extends StatelessWidget {
           children: [
             AccountButton(
               text: 'Log Out',
-              onTap: () => AccountServices().logOut(context),
+              onTap: () async {
+                AccountServices().logOut(context); //mongodb remove token
+                AuthService.logout();
+                // await FirebaseAuth.instance.signOut(); //firebase
+              },
             ),
             AccountButton(
               text: 'Your Wish List',

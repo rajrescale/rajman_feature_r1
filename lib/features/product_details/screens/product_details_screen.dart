@@ -2,8 +2,10 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dalvi/common/widgets/custom_button.dart';
 import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
+import 'package:dalvi/features/auth/screens/signin.dart';
 import 'package:dalvi/features/cart/screens/cart_screen.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
+import 'package:dalvi/features/product_details/screens/size_button.dart';
 import 'package:dalvi/features/product_details/services/product_details_services.dart';
 import 'package:dalvi/features/search/screens/search_screen.dart';
 import 'package:dalvi/models/product.dart';
@@ -24,36 +26,51 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final ProductDetailsServices productDetailsServices =
       ProductDetailsServices();
-
+  int defaultPrice = 500;
+  int selectedIndex = 0;
   void navigateToSearchScreen(String query) {
     Navigator.pushNamed(context, SearchScreen.routeName, arguments: query);
   }
 
-  void addToCart() {
-    productDetailsServices.addToCart(
-      context: context,
-      product: widget.product,
-    );
+  void addToCart(int index) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.user.token.isEmpty) {
+      // User is not authenticated, navigate to SignInScreen
+      Navigator.pushReplacementNamed(context, SignInScreen.routeName);
+    } else {
+      // User is authenticated, proceed with adding to cart logic
+      productDetailsServices
+          .addToCart(
+        context: context,
+        product: widget.product,
+        sizeIndex: index,
+      )
+          .then((_) {
+        navigateToCartScreen();
+        // Handle success or navigate to cart screen
+      });
+    }
   }
 
   void navigateToCartScreen() {
     Navigator.pushNamed(context, CartScreen.routeName);
   }
 
-  int _page = 0;
+  final int _page = 0;
   double bottomBarWidth = 42;
   double bottomBarBorderWidth = 5;
 
   @override
   Widget build(BuildContext context) {
-    final userCartLen = context.watch<UserProvider>().user.cart.length;
+    final userProvider = context.watch<UserProvider>().user;
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -118,22 +135,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(2.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: 20,
-                horizontal: 10,
-              ),
-              child: Text(
-                widget.product.name,
-                style: const TextStyle(fontSize: 15),
-              ),
-            ),
             CarouselSlider(
               items: widget.product.images.map(
                 (i) {
@@ -156,55 +157,101 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               height: 5,
             ),
             Padding(
-              padding: const EdgeInsets.all(8),
-              child: RichText(
-                text: TextSpan(
-                    text: 'Deal Price: ',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: '₹ ${widget.product.price}',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w500,
-                        ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 5,
+              ),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Text(
+                      widget.product.name,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
                       ),
-                    ]),
+                    ),
+                  ),
+                  Text(
+                    '( ${widget.product.sizesAndPrices[selectedIndex]['size']} ) ',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: GlobalVariables.specialGray,
+                    ),
+                  ),
+                ],
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(widget.product.description),
+              padding: const EdgeInsets.only(left: 8, right: 8, top: 8),
+              child: Text(
+                widget.product.sizesAndPrices.isNotEmpty
+                    ? '₹ ${widget.product.sizesAndPrices[selectedIndex]['price']}'
+                    : "500",
+                style: const TextStyle(
+                    color: GlobalVariables.specialColor, fontSize: 20),
+              ),
             ),
-            Container(
-              color: Colors.black12,
-              height: 5,
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.all(10.0),
+                  child: Text(
+                    "Size: ",
+                    style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18,
+                        color: GlobalVariables.specialGray),
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Wrap(
+                spacing: 10.0,
+                runSpacing: 10.0,
+                children: widget.product.sizesAndPrices.map((item) {
+                  String size = item['size'] ?? ''; // Access the 'size' field
+                  int price = item['price'] ?? 0; // Access the 'price' field
+                  defaultPrice = price;
+                  int index = widget.product.sizesAndPrices.indexOf(item);
+
+                  return SizeButton(
+                    text: ' $size ',
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    },
+                    index: selectedIndex == index ? true : false,
+                  );
+                }).toList(),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(10.0),
               child: CustomButton(
                 text: 'Add to Cart',
                 onTap: () {
-                  addToCart();
-                  navigateToCartScreen();
+                  addToCart(selectedIndex);
                 },
-                color: GlobalVariables.customCyan,
+                // color: GlobalVariables.customCyan,
               ),
             ),
-            const SizedBox(height: 8),
-            Container(
-              color: Colors.black12,
-              height: 5,
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Text(widget.product.description),
             ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
-      bottomNavigationBar: buildBottomNavigation(context, userCartLen),
+      bottomNavigationBar: userProvider.token.isNotEmpty
+          ? buildBottomNavigation(context, userProvider.cart.length)
+          : null,
     );
   }
 
@@ -213,8 +260,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return BottomNavigationBar(
       currentIndex: _page,
       selectedItemColor: Colors.black87,
-      unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-      backgroundColor: GlobalVariables.backgroundColor,
+      unselectedItemColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconSize: 28,
       onTap: (index) {
         performTap(index);
@@ -229,7 +276,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 top: BorderSide(
                   color: _page == 0
                       ? Colors.white
-                      : GlobalVariables.backgroundColor,
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -253,8 +300,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 1
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -278,8 +325,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 2
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -321,19 +368,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       case 0:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
         );
         break;
       case 1:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => AccountScreen()),
+          MaterialPageRoute(builder: (context) => const AccountScreen()),
         );
         break;
       case 2:
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => CartScreen()),
+          MaterialPageRoute(builder: (context) => const CartScreen()),
         );
         break;
     }

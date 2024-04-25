@@ -14,29 +14,68 @@ class CartServices {
   void removeFromCart({
     required BuildContext context,
     required Product product,
+    required String size,
   }) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
       http.Response res = await http.delete(
-        Uri.parse('$uri/api/remove-from-cart/${product.id}'),
+        Uri.parse('$uri/api/remove-from-cart'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'x-auth-token': userProvider.user.token,
         },
+        body: jsonEncode({
+          'id': product.id!,
+          'size': size,
+        }),
       );
 
       httpErrorHandle(
         response: res,
         context: context,
         onSuccess: () {
-          User user =
+          Users user =
               userProvider.user.copyWith(cart: jsonDecode(res.body)['cart']);
           userProvider.setUserFromModel(user);
-          showSnackBar(
-            context,
-            'Product Removed!',
-          );
+          // showSnackBar(
+          //   context,
+          //   'Product Removed!',
+          // );
+        },
+      );
+    } catch (e) {
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  Future<void> increaseProduct({
+    required BuildContext context,
+    required Product product,
+    required String size,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    try {
+      http.Response res = await http.post(
+        Uri.parse('$uri/api/increase-product'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': userProvider.user.token,
+        },
+        body: jsonEncode({
+          'id': product.id!,
+          'size': size,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          Users user =
+              userProvider.user.copyWith(cart: jsonDecode(res.body)['cart']);
+          userProvider.setUserFromModel(user);
         },
       );
     } catch (e) {

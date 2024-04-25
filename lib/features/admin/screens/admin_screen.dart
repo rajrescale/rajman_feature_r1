@@ -1,4 +1,3 @@
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/admin/screens/analytics_screen.dart';
 import 'package:dalvi/features/admin/screens/orders_screen.dart';
 import 'package:dalvi/features/admin/screens/posts_screen.dart';
@@ -14,7 +13,7 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   int _page = 0;
-  double bottomNavigationBarWidth = 42;
+  double bottomNavigationBarWidth = 50;
   double bottomBarBorderWidth = 5;
 
   List<Widget> pages = [
@@ -36,8 +35,8 @@ class _AdminScreenState extends State<AdminScreen> {
         preferredSize: const Size.fromHeight(50),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -69,9 +68,9 @@ class _AdminScreenState extends State<AdminScreen> {
       body: pages[_page],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _page,
-        selectedItemColor: GlobalVariables.selectedNavBarColor,
-        unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-        backgroundColor: GlobalVariables.backgroundColor,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Theme.of(context).primaryColorLight,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         iconSize: 28,
         onTap: updatePage,
         items: [
@@ -84,14 +83,19 @@ class _AdminScreenState extends State<AdminScreen> {
                 border: Border(
                   top: BorderSide(
                     color: _page == 0
-                        ? GlobalVariables.selectedNavBarColor
-                        : GlobalVariables.backgroundColor,
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).scaffoldBackgroundColor,
                     width: bottomBarBorderWidth,
                   ),
                 ),
               ),
-              child: const Icon(
-                Icons.home_outlined,
+              child: Text(
+                'Home', // Text to display
+                style: TextStyle(
+                  // Add any text styling here
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 13, // Adjust font size as needed
+                ),
               ),
             ),
             label: '',
@@ -104,14 +108,21 @@ class _AdminScreenState extends State<AdminScreen> {
                 border: Border(
                   top: BorderSide(
                     color: _page == 1
-                        ? GlobalVariables.selectedNavBarColor
-                        : GlobalVariables.backgroundColor,
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).scaffoldBackgroundColor,
                     width: bottomBarBorderWidth,
                   ),
                 ),
               ),
-              child: const Icon(
-                Icons.analytics_outlined,
+              child: Center(
+                child: Text(
+                  'Dashboard', // Text to display
+                  style: TextStyle(
+                    // Add any text styling here
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 13, // Adjust font size as needed
+                  ),
+                ),
               ),
             ),
             label: '',
@@ -125,14 +136,19 @@ class _AdminScreenState extends State<AdminScreen> {
                 border: Border(
                   top: BorderSide(
                     color: _page == 2
-                        ? GlobalVariables.selectedNavBarColor
-                        : GlobalVariables.backgroundColor,
+                        ? Theme.of(context).primaryColor
+                        : Theme.of(context).scaffoldBackgroundColor,
                     width: bottomBarBorderWidth,
                   ),
                 ),
               ),
-              child: const Icon(
-                Icons.all_inbox_outlined,
+              child: Text(
+                'Orders', // Text to display
+                style: TextStyle(
+                  // Add any text styling here
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 13, // Adjust font size as needed
+                ),
               ),
             ),
             label: '',

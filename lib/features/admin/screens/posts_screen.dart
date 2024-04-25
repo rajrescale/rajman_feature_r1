@@ -56,36 +56,56 @@ class _PostsScreenState extends State<PostsScreen> {
                 final productData = products![index];
                 return Padding(
                   padding: const EdgeInsets.only(left: 15, right: 15),
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      SizedBox(
-                        height: 120,
-                        child: SingleProduct(
-                          image: productData.images[0],
+                  child: InkWell(
+                    onTap: () {
+                      // Navigator.pushNamedAndRemoveUntil(
+                      //   context,
+                      //   AddProductScreen.routeName,
+                      //   (route) => true,
+                      // );
+                    },
+                    enableFeedback: true,
+                    child: Column(
+                      children: [
+                        const SizedBox(
+                          height: 10,
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              productData.name,
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
+                        SizedBox(
+                          height: 120,
+                          child: SingleProduct(
+                            image: productData.images.isNotEmpty
+                                ? productData.images[0]
+                                : "",
                           ),
-                          IconButton(
-                            onPressed: () => deleteProduct(productData, index),
-                            icon: const Icon(
-                              Icons.delete_outline,
-                            ),
+                          // child: ProductList(products: products ?? []),
+                        ),
+                        // const SizedBox(
+                        //   height: 10,
+                        // ),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  productData.name,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 2,
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () =>
+                                    deleteProduct(productData, index),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

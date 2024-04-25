@@ -1,13 +1,15 @@
 import 'package:dalvi/common/widgets/loader.dart';
-import 'package:dalvi/constants/global_variables.dart';
+import 'package:dalvi/constants/utils.dart';
 import 'package:dalvi/features/account/services/account_services.dart';
 import 'package:dalvi/features/order_details/screens/order_details.dart';
 import 'package:dalvi/models/order.dart';
+import 'package:dalvi/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class Orders extends StatefulWidget {
-  const Orders({Key? key}) : super(key: key);
+  const Orders({super.key});
 
   @override
   State<Orders> createState() => _OrdersState();
@@ -15,6 +17,7 @@ class Orders extends StatefulWidget {
 
 class _OrdersState extends State<Orders> {
   // int status = 0;
+  String showStatus = "";
   List<Order>? orders;
   final AccountServices accountServices = AccountServices();
 
@@ -25,8 +28,13 @@ class _OrdersState extends State<Orders> {
   }
 
   void fetchOrders() async {
-    orders = await accountServices.fetchMyOrders(context: context);
-    setState(() {});
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    if (userProvider.user.token.isNotEmpty) {
+      orders = await accountServices.fetchMyOrders(context: context);
+      setState(() {});
+    } else {
+      showSnackBar(context, "Not Authenticated");
+    }
   }
 
   String formatTimeDifference(DateTime previousTime) {
@@ -44,171 +52,225 @@ class _OrdersState extends State<Orders> {
 
   @override
   Widget build(BuildContext context) {
-    return orders == null
-        ? const Loader()
-        : Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(
-                      left: 15,
-                    ),
-                    child: const Text(
-                      'Your Orders :',
-                      style: TextStyle(),
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(
-                      right: 15,
-                    ),
-                    child: Text(
-                      'See all',
-                      style: TextStyle(
-                        color: GlobalVariables.selectedNavBarColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              // display orders
-              Container(
-                height: 320,
-                padding: const EdgeInsets.only(
-                  left: 10,
-                  top: 20,
-                  right: 10,
-                ),
-                child: ListView.builder(
-                  scrollDirection: Axis.vertical,
-                  itemCount: orders!.length,
-                  itemBuilder: (context, index) {
-                    print(orders![index].status);
-                    return InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          OrderDetailScreen.routeName,
-                          arguments: orders![index],
-                        );
-                      },
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Colors.black12,
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    return userProvider.user.token.isNotEmpty
+        ? orders == null
+            ? const Loader() // Show loader while fetching orders
+            : SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.only(
+                            left: 15,
+                          ),
+                          child: const Text(
+                            'Your Orders ',
+                            style: TextStyle(
+                              fontSize: 22,
+                            ),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(),
-                                  child: const Text(
-                                    'Order ID :',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                    right: 15,
-                                  ),
-                                  child: Text(
-                                    orders![index].id,
-                                    style: TextStyle(
-                                        color: const Color.fromRGBO(
-                                            0, 0, 0, 0.75)),
-                                  ),
-                                ),
-                              ],
+                        Container(
+                          padding: const EdgeInsets.only(
+                            right: 15,
+                          ),
+                          child: Text(
+                            ' ',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(),
-                                  child: const Text(
-                                    'Order Date :',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                    right: 15,
-                                  ),
-                                  child: Text(
-                                    DateFormat().format(
-                                      DateTime.fromMillisecondsSinceEpoch(
-                                          orders![index].orderedAt),
-                                    ),
-                                    style: TextStyle(
-                                        color: const Color.fromRGBO(
-                                            0, 0, 0, 0.75)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(),
-                                  child: const Text(
-                                    'Total Amount :',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                    right: 15,
-                                  ),
-                                  child: Text(
-                                    '₹ ${orders![index].totalPrice}',
-                                    style: TextStyle(
-                                        color: const Color.fromRGBO(
-                                            0, 0, 0, 0.75)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.only(),
-                                  child: const Text(
-                                    'Last Update :',
-                                    style: TextStyle(color: Colors.black87),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.only(
-                                    right: 15,
-                                  ),
-                                  child: Text(
-                                    formatTimeDifference(
-                                        DateTime.fromMillisecondsSinceEpoch(
-                                            orders![index].lastUpdate)),
-                                    style: TextStyle(
-                                        color: const Color.fromRGBO(
-                                            0, 0, 0, 0.75)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                    // display orders
+                    orders!.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                SizedBox(
+                                  height: 100,
+                                ),
+                                Text("Empty"),
+                              ],
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.only(
+                              left: 10,
+                              top: 20,
+                              right: 10,
+                            ),
+                            child: ListView.builder(
+                              shrinkWrap:
+                                  true, // Added shrinkWrap to make ListView take only the space it needs
+                              physics: const NeverScrollableScrollPhysics(),
+                              scrollDirection: Axis.vertical,
+                              itemCount: orders!.length,
+                              itemBuilder: (context, index) {
+                                switch (orders![index].status) {
+                                  case 0:
+                                    showStatus = "Order Placed ";
+                                    break;
+                                  case 1:
+                                    showStatus = "Payment Received ";
+                                    break;
+                                  case 2:
+                                    showStatus = "Delivered ";
+                                    break;
+                                  // case 3:
+                                  //   showStatus = "Complaint ";
+                                  //   break;
+                                  // case 4:
+                                  //   showStatus = "Cancelled ";
+                                  //   break;
+                                  // case 5:
+                                  //   showStatus = "Refunded ";
+                                  //   break;
+                                  default:
+                                    showStatus = "";
+                                    break;
+                                }
+                                return InkWell(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      OrderDetailScreen.routeName,
+                                      arguments: orders![index],
+                                    );
+                                  },
+                                  child: Container(
+                                    width: double.infinity,
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                        color:
+                                            Theme.of(context).primaryColorDark,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Order ID :',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                              ),
+                                            ),
+                                            Text(
+                                              orders![index].id,
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Order Date :',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                              ),
+                                            ),
+                                            Text(
+                                              DateFormat().format(
+                                                DateTime
+                                                    .fromMillisecondsSinceEpoch(
+                                                        orders![index]
+                                                            .orderedAt),
+                                              ),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .primaryColorLight,
+                                                  fontSize: 10),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'Total Amount :',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                              ),
+                                            ),
+                                            Text(
+                                              '₹ ${orders![index].totalPrice}',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              ' ',
+                                              style: TextStyle(
+                                                color: Theme.of(context)
+                                                    .primaryColorLight,
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  showStatus,
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .primaryColorLight,
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  formatTimeDifference(DateTime
+                                                      .fromMillisecondsSinceEpoch(
+                                                          orders![index]
+                                                              .lastUpdate)),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    color: Theme.of(context)
+                                                        .primaryColorLight,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                  ],
                 ),
-              ),
-            ],
-          );
+              )
+        : const Text("Not authenticated");
   }
 }

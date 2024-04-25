@@ -1,25 +1,20 @@
 import 'dart:convert';
 
-// import 'package:dalvi/models/rating.dart';
-
 class Product {
   final String name;
   final String description;
   final int quantity;
   final List<String> images;
-  final String category;
-  final int price;
+  final List<Map<String, dynamic>> sizesAndPrices; // Updated field
   final String? id;
-  // final List<Rating>? rating;
+
   Product({
     required this.name,
     required this.description,
     required this.quantity,
     required this.images,
-    required this.category,
-    required this.price,
+    required this.sizesAndPrices,
     this.id,
-    // this.rating,
   });
 
   Map<String, dynamic> toMap() {
@@ -28,10 +23,8 @@ class Product {
       'description': description,
       'quantity': quantity,
       'images': images,
-      'category': category,
-      'price': price,
+      'sizesAndPrices': sizesAndPrices, // Updated field
       'id': id,
-      // 'rating': rating,
     };
   }
 
@@ -41,16 +34,9 @@ class Product {
       description: map['description'] ?? '',
       quantity: map['quantity'],
       images: List<String>.from(map['images']),
-      category: map['category'] ?? '',
-      price: map['price'],
+      sizesAndPrices: List<Map<String, dynamic>>.from(
+          map['sizesAndPrices']), // Updated field
       id: map['_id'],
-      // rating: map['ratings'] != null
-      //     ? List<Rating>.from(
-      //         map['ratings']?.map(
-      //           (x) => Rating.fromMap(x),
-      //         ),
-      //       )
-      //     : null,
     );
   }
 

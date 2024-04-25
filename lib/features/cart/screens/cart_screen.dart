@@ -1,5 +1,4 @@
 import 'package:dalvi/common/widgets/custom_button.dart';
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/account/screens/account_screen.dart';
 import 'package:dalvi/features/address/screens/address_screen.dart';
 import 'package:dalvi/features/cart/widgets/cart_product.dart';
@@ -16,7 +15,7 @@ import 'package:badges/badges.dart' as badges;
 
 class CartScreen extends StatefulWidget {
   static const String routeName = '/cart';
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen({super.key});
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -27,25 +26,25 @@ class _CartScreenState extends State<CartScreen> {
     Navigator.pushNamed(context, SearchScreen.routeName, arguments: query);
   }
 
-  void navigateToAddress(int sum) {
-    Navigator.pushNamed(
+  void navigateToAddress(BuildContext context, num sum) {
+    Navigator.pushReplacementNamed(
       context,
       AddressScreen.routeName,
       arguments: sum.toString(),
     );
   }
 
-  int _page = 2;
+  final int _page = 2;
   double bottomBarWidth = 42;
   double bottomBarBorderWidth = 5;
 
   @override
   Widget build(BuildContext context) {
-    final userCartLen = context.watch<UserProvider>().user.cart.length;
+    final userProvider = context.watch<UserProvider>().user;
     final user = context.watch<UserProvider>().user;
     int sum = 0;
     user.cart
-        .map((e) => sum += e['quantity'] * e['product']['price'] as int)
+        .map((e) => sum += e['quantity'] * e['sizeAndPrice']['price'] as int)
         .toList();
 
     return Scaffold(
@@ -53,8 +52,8 @@ class _CartScreenState extends State<CartScreen> {
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: Row(
@@ -65,7 +64,7 @@ class _CartScreenState extends State<CartScreen> {
                   height: 42,
                   margin: const EdgeInsets.only(left: 15),
                   child: Material(
-                    borderRadius: BorderRadius.circular(7),
+                    borderRadius: BorderRadius.circular(70),
                     elevation: 1,
                     child: TextFormField(
                       onFieldSubmitted: navigateToSearchScreen,
@@ -115,45 +114,88 @@ class _CartScreenState extends State<CartScreen> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const AddressBox(),
-            const CartSubtotal(),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomButton(
-                  text: 'Proceed to Buy (${user.cart.length} items)',
-                  onTap: () => navigateToAddress(sum),
-                  color: GlobalVariables.customCyan),
-            ),
-            const SizedBox(height: 15),
-            Container(
-              color: Colors.black12.withOpacity(0.08),
-              height: 1,
-            ),
-            const SizedBox(height: 5),
-            ListView.builder(
-              itemCount: user.cart.length,
-              shrinkWrap: true,
-              itemBuilder: (context, index) {
-                final productMap = user.cart[index]['product'];
-                final product = Product.fromMap(productMap);
-                return InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(context, ProductDetailScreen.routeName,
-                        arguments: product);
-                  },
-                  child: CartProduct(
-                    index: index,
+      body: user.cart.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "Cart is Empty",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                   ),
-                );
-              },
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: CustomButton(
+                      text: "Buy",
+                      onTap: () {
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          HomeScreen.routeName,
+                          (route) =>
+                              false, // This condition ensures that all previous routes are removed
+                        );
+                        // Navigator.pushReplacementNamed(
+                        //   context,
+                        //   HomeScreen.routeName,
+                        // );
+                      },
+                      // color: GlobalVariables.customCyan,
+                    ),
+                  )
+                ],
+              ),
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AddressBox(),
+                const SizedBox(height: 15),
+                Container(
+                  color: Colors.black12.withOpacity(0.08),
+                  height: 1,
+                ),
+                const SizedBox(height: 5),
+                const CartSubtotal(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CustomButton(
+                    text: 'Proceed to Buy (${user.cart.length} items)',
+                    onTap: () {
+                      navigateToAddress(context, sum);
+                    },
+                    // color: GlobalVariables.customCyan,
+                  ),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: user.cart.length,
+                    shrinkWrap: true,
+                    itemBuilder: (context, index) {
+                      final productMap = user.cart[index]['product'];
+                      final product = Product.fromMap(productMap);
+                      return InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            ProductDetailScreen.routeName,
+                            arguments: product,
+                          );
+                        },
+                        child: CartProduct(
+                          index: index,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: buildBottomNavigation(context, userCartLen),
+      bottomNavigationBar: userProvider.token.isNotEmpty
+          ? buildBottomNavigation(context, userProvider.cart.length)
+          : null,
     );
   }
 
@@ -161,9 +203,9 @@ class _CartScreenState extends State<CartScreen> {
       BuildContext context, int userCartLen) {
     return BottomNavigationBar(
       currentIndex: _page,
-      selectedItemColor: GlobalVariables.selectedNavBarColor,
-      unselectedItemColor: GlobalVariables.unselectedNavBarColor,
-      backgroundColor: GlobalVariables.backgroundColor,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Theme.of(context).primaryColorLight,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       iconSize: 28,
       onTap: (index) {
         if (index != _page) {
@@ -179,8 +221,8 @@ class _CartScreenState extends State<CartScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 0
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -204,8 +246,8 @@ class _CartScreenState extends State<CartScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 1
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),
@@ -229,8 +271,8 @@ class _CartScreenState extends State<CartScreen> {
               border: Border(
                 top: BorderSide(
                   color: _page == 2
-                      ? GlobalVariables.selectedNavBarColor
-                      : GlobalVariables.backgroundColor,
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).scaffoldBackgroundColor,
                   width: bottomBarBorderWidth,
                 ),
               ),

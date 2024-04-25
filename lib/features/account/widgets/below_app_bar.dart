@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/providers/user_provider.dart';
+
 class BelowAppBar extends StatelessWidget {
-  const BelowAppBar({Key? key}) : super(key: key);
+  const BelowAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
     final user = Provider.of<UserProvider>(context).user;
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: GlobalVariables.appBarGradient,
+      decoration: BoxDecoration(
+        color: Theme.of(context).primaryColor,
       ),
       padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
       child: Row(
@@ -25,7 +25,7 @@ class BelowAppBar extends StatelessWidget {
               ),
               children: [
                 TextSpan(
-                  text: user.name,
+                  text: user.token.isEmpty ? 'guest' : user.name,
                   style: const TextStyle(
                     fontSize: 22,
                     color: Colors.black,

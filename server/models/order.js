@@ -9,8 +9,19 @@ const orderSchema = mongoose.Schema({
         type: Number,
         required: true,
       },
+      sizeAndPrice: {
+        size: {
+          type: String,
+          required: true,
+        },
+        price: {
+          type: Number,
+          required: true,
+        },
+      },
     },
   ],
+
   totalPrice: {
     type: Number,
     required: true,
@@ -29,7 +40,7 @@ const orderSchema = mongoose.Schema({
   },
   status: {
     type: Number,
-    default: 1,
+    default: 0,
   },
   lastUpdate: {
     type: Number,

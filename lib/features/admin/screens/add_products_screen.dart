@@ -4,11 +4,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:dalvi/common/widgets/custom_button.dart';
 import 'package:dalvi/common/widgets/custom_textfield.dart';
 import 'package:dalvi/constants/global_variables.dart';
-import 'package:dalvi/constants/utils.dart';
 import 'package:dalvi/features/admin/services/admin_services.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter/widgets.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AddProductScreen extends StatefulWidget {
   static const String routeName = '/add-product';
@@ -23,11 +24,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
   final TextEditingController quantityController = TextEditingController();
+  final List<TextEditingController> sizeControllers =
+      List.generate(3, (index) => TextEditingController());
+  final List<TextEditingController> priceControllers =
+      List.generate(3, (index) => TextEditingController());
 
   final AdminServices adminServices = AdminServices();
-  String category = 'Mango1';
-
-  List<File> images = [];
+  File? file;
+  FilePickerResult? result;
+  Uint8List? imageBytes;
+  Uint8List? images;
+  List<String> url = [];
   final _addProductFormKey = GlobalKey<FormState>();
   @override
   void dispose() {
@@ -36,33 +43,88 @@ class _AddProductScreenState extends State<AddProductScreen> {
     descriptionController.dispose();
     priceController.dispose();
     quantityController.dispose();
+    for (var controller in sizeControllers) {
+      controller.dispose();
+    }
+    for (var controller in priceControllers) {
+      controller.dispose();
+    }
   }
 
-  List<String> productCategories = [
-    'Mango1',
-    'Mango2',
-    'Mango3',
-    'Mango4',
-    'Mango5',
-  ];
+  Future<Object?> pickImages() async {
+    try {
+      if (kIsWeb) {
+        // For web, iOS, and Android, pick image as bytes
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+        );
 
-  void selectImages() async {
-    var res = await pickImages();
-    setState(() {
-      images = res;
-    });
+        if (result != null && result.files.isNotEmpty) {
+          // Read the selected file as bytes
+          PlatformFile file = result.files.first;
+          Uint8List? fileBytes = file.bytes;
+          Uint8List bytes = Uint8List.fromList(fileBytes!);
+          imageBytes = bytes;
+        } else {
+          // User canceled the picker or no file was selected
+          return [];
+        }
+
+        if (imageBytes != null) {
+          adminServices
+              .uploadImageToCloudinary(context, imageBytes!)
+              .then((List<String> imageUrlList) {
+            setState(() {
+              url = imageUrlList;
+            });
+          });
+        }
+      } else if (await Permission.storage.request().isGranted) {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+        );
+
+        if (result != null && result.files.isNotEmpty) {
+          // Get the file path
+          PlatformFile file = result.files.first;
+          adminServices.uploadimage(context, file).then((String imageUrlList) {
+            setState(() {
+              url.add(imageUrlList);
+            });
+          });
+        } else {
+          // User canceled the picker or no file was selected
+          return [];
+        }
+      }
+    } catch (e) {
+      // Handle any errors that occur during the file picking process
+      return [];
+    }
+
+    return imageBytes;
   }
 
   void sellProduct() {
-    if (_addProductFormKey.currentState!.validate() && images.isNotEmpty) {
+    // Extract size and price data from controllers
+    List<Map<String, dynamic>> sizesAndPrices = List.generate(3, (index) {
+      return {
+        'size': sizeControllers[index].text,
+        'price': int.parse(priceControllers[index].text),
+      };
+    });
+    if (_addProductFormKey.currentState!.validate()) {
+      print('URL length: ${url}');
+      print('URL : ${url[0]}');
       adminServices.sellProduct(
         context: context,
         name: productNameController.text,
         description: descriptionController.text,
-        price: int.parse(priceController.text),
+        sizesAndPrices: sizesAndPrices,
+        imageUrls: url,
         quantity: int.parse(quantityController.text),
-        category: category,
-        images: images,
       );
     }
   }
@@ -74,8 +136,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
         preferredSize: const Size.fromHeight(50),
         child: AppBar(
           flexibleSpace: Container(
-            decoration: const BoxDecoration(
-              gradient: GlobalVariables.appBarGradient,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
             ),
           ),
           title: const Text(
@@ -97,61 +159,61 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 const SizedBox(
                   height: 15,
                 ),
-                images.isNotEmpty
-                    ? CarouselSlider(
-                        items: images.map(
-                          (i) {
-                            return Builder(
-                              builder: (BuildContext context) => Image.file(
-                                i,
-                                fit: BoxFit.cover,
-                                height: 200,
-                              ),
-                            );
-                          },
-                        ).toList(),
-                        options: CarouselOptions(
-                          viewportFraction: 1,
+                if (url.isNotEmpty) ...{
+                  CarouselSlider(
+                    items: url.map((imageUrl) {
+                      return Builder(
+                        builder: (BuildContext context) => Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
                           height: 200,
                         ),
-                      )
-                    : GestureDetector(
-                        onTap: selectImages,
-                        child: DottedBorder(
-                          borderType: BorderType.RRect,
-                          radius: const Radius.circular(10),
-                          dashPattern: const [10, 4],
-                          strokeCap: StrokeCap.round,
-                          child: Container(
-                            width: double.infinity,
-                            height: 150,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(
-                                10,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.folder_open,
-                                  size: 40,
-                                ),
-                                const SizedBox(
-                                  height: 15,
-                                ),
-                                Text(
-                                  "Select Product Images",
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: Colors.grey.shade400,
-                                  ),
-                                )
-                              ],
-                            ),
+                      );
+                    }).toList(),
+                    options: CarouselOptions(
+                      viewportFraction: 1,
+                      height: 200,
+                    ),
+                  ),
+                } else ...{
+                  GestureDetector(
+                    onTap: pickImages,
+                    child: DottedBorder(
+                      borderType: BorderType.RRect,
+                      radius: const Radius.circular(10),
+                      dashPattern: const [10, 4],
+                      strokeCap: StrokeCap.round,
+                      child: Container(
+                        width: double.infinity,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            10,
                           ),
                         ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.folder_open,
+                              size: 40,
+                            ),
+                            SizedBox(
+                              height: 15,
+                            ),
+                            Text(
+                              "Select Product Images",
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: GlobalVariables.specialGray,
+                              ),
+                            )
+                          ],
+                        ),
                       ),
+                    ),
+                  ),
+                },
                 const SizedBox(
                   height: 25,
                 ),
@@ -170,9 +232,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 const SizedBox(
                   height: 10,
                 ),
-                CustomTextField(
-                  controller: priceController,
-                  hintText: 'Price',
+                ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: sizeControllers.length,
+                  itemBuilder: (context, index) {
+                    return Column(
+                      children: [
+                        CustomTextField(
+                          controller: sizeControllers[index],
+                          hintText: 'Size ${index + 1}',
+                        ),
+                        const SizedBox(height: 10),
+                        CustomTextField(
+                          controller: priceControllers[index],
+                          hintText: 'Price ${index + 1}',
+                        ),
+                        const SizedBox(height: 20),
+                      ],
+                    );
+                  },
                 ),
                 const SizedBox(
                   height: 10,
@@ -181,35 +259,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   controller: quantityController,
                   hintText: 'Quantity',
                 ),
-                SizedBox(
-                  width: double.infinity,
-                  child: DropdownButton(
-                    icon: const Icon(Icons.keyboard_arrow_down),
-                    value: category,
-                    items: productCategories.map(
-                      (String item) {
-                        return DropdownMenuItem(
-                          value: item,
-                          child: Text(item),
-                        );
-                      },
-                    ).toList(),
-                    onChanged: (String? newVal) {
-                      setState(
-                        () {
-                          category = newVal!;
-                        },
-                      );
-                    },
-                  ),
-                ),
                 const SizedBox(
                   height: 10,
                 ),
                 CustomButton(
                   text: 'Sell',
                   onTap: sellProduct,
-                  color: GlobalVariables.customCyan,
+                  // color: GlobalVariables.customCyan,
                 ),
               ],
             ),

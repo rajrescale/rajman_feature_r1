@@ -6,14 +6,14 @@ const { Product } = require("../models/product.js");
 productRouter.get("/api/products", async (req, res) => {
   try {
     const products = await Product.find({});
-    res.json(products);
+    return res.json(products);
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
   }
 });
 
 // create a get request to search products and get them
-// /api/products/search/i
+
 productRouter.get("/api/products/search/:name", auth, async (req, res) => {
   try {
     const products = await Product.find({

@@ -1,12 +1,12 @@
 import 'dart:io';
 
-import 'package:dalvi/constants/global_variables.dart';
 import 'package:dalvi/features/admin/screens/admin_screen.dart';
-import 'package:dalvi/features/auth/screens/signin.dart';
 import 'package:dalvi/features/auth/services/auth_service.dart';
 import 'package:dalvi/features/home/screens/home_screen.dart';
+import 'package:dalvi/firebase_options.dart';
 import 'package:dalvi/providers/user_provider.dart';
 import 'package:dalvi/router.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +20,13 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-void main() {
+void main() async {
   HttpOverrides.global = MyHttpOverrides();
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (context) => UserProvider(),
@@ -30,7 +35,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -46,28 +51,40 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Dalvi Farm',
       theme: ThemeData(
-          scaffoldBackgroundColor: GlobalVariables.backgroundColor,
-          colorScheme: const ColorScheme.light(
-            primary: Colors.cyan,
+        // scaffoldBackgroundColor:Theme.of(context).scaffoldBackgroundColor,
+        colorScheme: ColorScheme.light(
+          primary: Colors.amber.shade300,
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        // primaryColor: Colors.amber.shade300,
+
+        primaryTextTheme: const TextTheme(
+          headline1: TextStyle(color: Colors.black),
+        ),
+
+        // highlightColor: Colors.red,
+        // hintColor: Colors.red,
+        primaryColorDark: Colors.white,
+        primaryColorLight: Colors.black,
+        appBarTheme: AppBarTheme(
+          elevation: 0,
+          backgroundColor: Colors.amber[300],
+          iconTheme: const IconThemeData(
+            color: Colors.black,
           ),
-          appBarTheme: const AppBarTheme(
-              elevation: 0,
-              backgroundColor: GlobalVariables.customCyan,
-              iconTheme: IconThemeData(
-                color: Colors.black,
-              ))),
+        ),
+        useMaterial3: true,
+      ),
       onGenerateRoute: (settings) => generateRoute(settings, context),
       home: Scaffold(
-        body: Provider.of<UserProvider>(context).user.token.isNotEmpty
-            ? Provider.of<UserProvider>(context).user.type == "admin"
-                ? const AdminScreen()
-                : const HomeScreen()
-            : const SignInScreen(),
-      ),
+          body: userProvider.user.type == "admin"
+              ? const AdminScreen()
+              : const HomeScreen()),
     );
   }
 }

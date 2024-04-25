@@ -1,6 +1,7 @@
 // IMPORTS FROM PACKAGES
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 // IMPORTS FROM OTHER FILES
 const authRouter = require("./routes/auth.js");
 const productRouter = require("./routes/product.js");
@@ -8,23 +9,17 @@ const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
 const cors = require("cors");
 //  INIT
-
-
-const PORT = 80;
-// const PORT = 3000;
+dotenv.config();
+// const PORT = 80;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
-const DB =
-  "mongodb+srv://rajmanbind3535:FuCAVzw1GxtDWSUE@cluster0.g0b73gw.mongodb.net/myDataBase?retryWrites=true&w=majority";
+const DB = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.g0b73gw.mongodb.net/myDataBase?retryWrites=true&w=majority`;
 
-// middleware
-// Middleware to log request details
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.originalUrl}`);
   next();
 });
-
-
 
 app.use(express.json());
 app.use(cors());
@@ -33,7 +28,6 @@ app.use(adminRouter);
 app.use(productRouter);
 app.use(userRouter);
 
-// connections
 mongoose
   .connect(DB)
   .then(() => {
